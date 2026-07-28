@@ -121,12 +121,12 @@ def parse_two_links(text: str) -> dict | None:
     if not is_http_url(check_link):
         return None
 
-    # The nested URL is not percent-encoded, so its boundary is only knowable
-    # when nothing ambiguous follows it. Reject rather than guess:
-    #   "...?u=5https://offers.com/s" -> two URLs glued together
-    #   "...&sub1=abc"                -> outer params captured into the check URL
-    if "://" in check_link[len("https://"):] or "&" in check_link:
-        print("Ambiguous nested devid URL - ask for space-separated input")
+    # If two URLs were concatenated with no separator, the captured value
+    # will contain TWO protocol strings (e.g. "...au=5https://check.com").
+    # A single devid URL with its own query params (like &camp=&prod=) is
+    # perfectly valid and should pass.
+    if "://" in check_link[len("https://"):]:
+        print("Two concatenated URLs detected - ask for space-separated input")
         return None
 
     print(f"Parsed (nested devid):\n  Vmtrk: {vmtrk_link}\n  Check: {check_link}")
